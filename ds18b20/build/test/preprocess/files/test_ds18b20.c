@@ -1,14 +1,19 @@
 #include "build/temp/_test_ds18b20.c"
-#include "gpio.h"
+#include "mock_delay.h"
+#include "mock_gpio.h"
 #include "oneWireSensor.h"
 #include "unity.h"
 
 
 
 
-void setup(){
+oneWireSensor_t me;
 
 
+
+void setUp(){
+
+ oneWireSensorInit(&me, NINE_BITS_RESOLUTION, GPIO0);
 
 }
 
@@ -60,16 +65,78 @@ void testSensorReadyToWorkAfterInit(){
 
   oneWireSensorInit(&me, NINE_BITS_RESOLUTION + i, GPIO0 + i);
 
-  UnityAssertEqualNumber((UNITY_INT)(UNITY_INT32)((NINE_BITS_RESOLUTION + i)), (UNITY_INT)(UNITY_INT32)((me.operation.resolution)), ((msg)), (UNITY_UINT)(33), UNITY_DISPLAY_STYLE_INT32);
+  UnityAssertEqualNumber((UNITY_INT)(UNITY_INT32)((NINE_BITS_RESOLUTION + i)), (UNITY_INT)(UNITY_INT32)((me.operation.resolution)), ((msg)), (UNITY_UINT)(36), UNITY_DISPLAY_STYLE_INT32);
 
-  UnityAssertFloatsWithin((UNITY_FLOAT)((UNITY_FLOAT)((oneWireSensorStep[i])) * (UNITY_FLOAT)(0.00001f)), (UNITY_FLOAT)((UNITY_FLOAT)((oneWireSensorStep[i]))), (UNITY_FLOAT)((UNITY_FLOAT)((me.operation.step))), (((msg))), (UNITY_UINT)((UNITY_UINT)(34)));
+  UnityAssertFloatsWithin((UNITY_FLOAT)((UNITY_FLOAT)((oneWireSensorStep[i])) * (UNITY_FLOAT)(0.00001f)), (UNITY_FLOAT)((UNITY_FLOAT)((oneWireSensorStep[i]))), (UNITY_FLOAT)((UNITY_FLOAT)((me.operation.step))), (((msg))), (UNITY_UINT)((UNITY_UINT)(37)));
 
-  UnityAssertEqualNumber((UNITY_INT)(UNITY_INT32)((oneWireSensorDelay[i])), (UNITY_INT)(UNITY_INT32)((me.operation.delay)), ((msg)), (UNITY_UINT)(35), UNITY_DISPLAY_STYLE_INT32);
+  UnityAssertEqualNumber((UNITY_INT)(UNITY_INT32)((oneWireSensorDelay[i])), (UNITY_INT)(UNITY_INT32)((me.operation.delay)), ((msg)), (UNITY_UINT)(38), UNITY_DISPLAY_STYLE_INT32);
 
-  UnityAssertEqualNumber((UNITY_INT)(UNITY_INT32)((oneWireSensorMask[i])), (UNITY_INT)(UNITY_INT32)((me.operation.mask)), ((msg)), (UNITY_UINT)(36), UNITY_DISPLAY_STYLE_INT32);
+  UnityAssertEqualNumber((UNITY_INT)(UNITY_INT32)((oneWireSensorMask[i])), (UNITY_INT)(UNITY_INT32)((me.operation.mask)), ((msg)), (UNITY_UINT)(39), UNITY_DISPLAY_STYLE_INT32);
 
-  UnityAssertEqualNumber((UNITY_INT)(UNITY_INT32)((GPIO0 + i)), (UNITY_INT)(UNITY_INT32)((me.gpio)), ((msg)), (UNITY_UINT)(37), UNITY_DISPLAY_STYLE_INT32);
+  UnityAssertEqualNumber((UNITY_INT)(UNITY_INT32)((GPIO0 + i)), (UNITY_INT)(UNITY_INT32)((me.gpio)), ((msg)), (UNITY_UINT)(40), UNITY_DISPLAY_STYLE_INT32);
 
  }
+
+}
+
+
+
+void testWriteOneByteToSensor(){
+
+ uint8_t i;
+
+ oneWireSensorCommand_t command = SKIP_ROM;
+
+ for(i=0; i<8; i++){
+
+  gpioConfig_CMockExpectAndReturn(48, GPIO0, GPIO_OUTPUT, 
+
+ 1
+
+ );
+
+  gpioWrite_CMockExpectAndReturn(49, GPIO0, 
+
+ 0
+
+ , 
+
+ 1
+
+ );
+
+  if(command & 0x01){
+
+   delayInaccurateUs_CMockExpect(51, 10);
+
+   gpioConfig_CMockExpectAndReturn(52, GPIO0, GPIO_INPUT, 
+
+  1
+
+  );
+
+   delayInaccurateUs_CMockExpect(53, 52);
+
+  }
+
+  else{
+
+   delayInaccurateUs_CMockExpect(56, 60);
+
+   gpioConfig_CMockExpectAndReturn(57, GPIO0, GPIO_INPUT, 
+
+  1
+
+  );
+
+   delayInaccurateUs_CMockExpect(58, 2);
+
+  }
+
+  command = command >> 1;
+
+ }
+
+ oneWireSensorWriteByte(&me, SKIP_ROM);
 
 }

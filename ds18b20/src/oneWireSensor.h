@@ -11,7 +11,7 @@
 
 /*==================[inclusions]=============================================*/
 #include "gpio.h"
-#include "stdint.h"
+#include <stdint.h>
 /*==================[macros]=================================================*/
 /** 
 * @def MAX_RESOLUTIONS
@@ -19,6 +19,16 @@
 */
 #define MAX_RESOLUTIONS					4
 /*==================[typedef]================================================*/
+/**
+* @enum oneWireSensorCommand_t
+* @brief Comandos para el sensor OneWire ds18b20.
+*/
+typedef enum{
+	CONVERT_T = 0x44,   		/**< Conversion de temperatura */
+	SKIP_ROM = 0xCC, 			/**< Descarte de ROM */
+	READ_SCRATCHPAD = 0xBE		/**< Lectura de SCRATCHPAD */
+} oneWireSensorCommand_t;
+
 /**
 * @enum oneWireSensorResolution_t
 * @brief Resoluciones posbiles en bits del sensor OneWire.
@@ -93,5 +103,13 @@ typedef struct{
 * @return Nada.
 */
 void oneWireSensorInit(oneWireSensor_t *me, oneWireSensorResolution_t resolution, gpioMap_t gpio);
+
+/**
+* @fn void oneWireSensorWriteByte(oneWireSensorCommand_t command)
+* @brief Escritura de un byte al sensor
+* @param command : Comando a enviar.
+* @return Nada.
+*/
+void oneWireSensorWriteByte(oneWireSensor_t *me, oneWireSensorCommand_t command);
 /*==================[end of file]============================================*/
 #endif /* #ifndef _ONE_WIRE_SENSOR_H_ */

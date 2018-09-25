@@ -4,14 +4,17 @@
   :file: test_ds18b20.c
 :successes:
 - :test: testSensorReadyToWorkAfterInit
-  :line: 15
+  :line: 18
+  :message: ''
+- :test: testWriteOneByteToSensor
+  :line: 44
   :message: ''
 :failures: []
 :ignores: []
 :counts:
-  :total: 1
-  :passed: 1
+  :total: 2
+  :passed: 2
   :failed: 0
   :ignored: 0
 :stdout: []
-:time: 0.0008986100001493469
+:time: 0.0008225849996961188
