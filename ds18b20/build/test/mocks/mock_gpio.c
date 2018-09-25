@@ -8,6 +8,7 @@
 
 static const char* CMockString_config = "config";
 static const char* CMockString_gpioConfig = "gpioConfig";
+static const char* CMockString_gpioRead = "gpioRead";
 static const char* CMockString_gpioWrite = "gpioWrite";
 static const char* CMockString_pin = "pin";
 static const char* CMockString_value = "value";
@@ -32,6 +33,15 @@ typedef struct _CMOCK_gpioWrite_CALL_INSTANCE
 
 } CMOCK_gpioWrite_CALL_INSTANCE;
 
+typedef struct _CMOCK_gpioRead_CALL_INSTANCE
+{
+  UNITY_LINE_TYPE LineNumber;
+  _Bool ReturnVal;
+  int CallOrder;
+  gpioMap_t Expected_pin;
+
+} CMOCK_gpioRead_CALL_INSTANCE;
+
 static struct mock_gpioInstance
 {
   int gpioConfig_IgnoreBool;
@@ -44,6 +54,11 @@ static struct mock_gpioInstance
   CMOCK_gpioWrite_CALLBACK gpioWrite_CallbackFunctionPointer;
   int gpioWrite_CallbackCalls;
   CMOCK_MEM_INDEX_TYPE gpioWrite_CallInstance;
+  int gpioRead_IgnoreBool;
+  _Bool gpioRead_FinalReturn;
+  CMOCK_gpioRead_CALLBACK gpioRead_CallbackFunctionPointer;
+  int gpioRead_CallbackCalls;
+  CMOCK_MEM_INDEX_TYPE gpioRead_CallInstance;
 } Mock;
 
 extern jmp_buf AbortFrame;
@@ -65,6 +80,12 @@ void mock_gpio_Verify(void)
   UNITY_TEST_ASSERT(CMOCK_GUTS_NONE == Mock.gpioWrite_CallInstance, cmock_line, CMockStringCalledLess);
   if (Mock.gpioWrite_CallbackFunctionPointer != NULL)
     Mock.gpioWrite_CallInstance = CMOCK_GUTS_NONE;
+  if (Mock.gpioRead_IgnoreBool)
+    Mock.gpioRead_CallInstance = CMOCK_GUTS_NONE;
+  UNITY_SET_DETAIL(CMockString_gpioRead);
+  UNITY_TEST_ASSERT(CMOCK_GUTS_NONE == Mock.gpioRead_CallInstance, cmock_line, CMockStringCalledLess);
+  if (Mock.gpioRead_CallbackFunctionPointer != NULL)
+    Mock.gpioRead_CallInstance = CMOCK_GUTS_NONE;
 }
 
 void mock_gpio_Init(void)
@@ -80,6 +101,8 @@ void mock_gpio_Destroy(void)
   Mock.gpioConfig_CallbackCalls = 0;
   Mock.gpioWrite_CallbackFunctionPointer = NULL;
   Mock.gpioWrite_CallbackCalls = 0;
+  Mock.gpioRead_CallbackFunctionPointer = NULL;
+  Mock.gpioRead_CallbackCalls = 0;
   GlobalExpectCount = 0;
   GlobalVerifyOrder = 0;
 }
@@ -236,5 +259,77 @@ void gpioWrite_StubWithCallback(CMOCK_gpioWrite_CALLBACK Callback)
 {
   Mock.gpioWrite_IgnoreBool = (int)0;
   Mock.gpioWrite_CallbackFunctionPointer = Callback;
+}
+
+_Bool gpioRead(gpioMap_t pin)
+{
+  UNITY_LINE_TYPE cmock_line = TEST_LINE_NUM;
+  CMOCK_gpioRead_CALL_INSTANCE* cmock_call_instance;
+  UNITY_SET_DETAIL(CMockString_gpioRead);
+  cmock_call_instance = (CMOCK_gpioRead_CALL_INSTANCE*)CMock_Guts_GetAddressFor(Mock.gpioRead_CallInstance);
+  Mock.gpioRead_CallInstance = CMock_Guts_MemNext(Mock.gpioRead_CallInstance);
+  if (Mock.gpioRead_IgnoreBool)
+  {
+    UNITY_CLR_DETAILS();
+    if (cmock_call_instance == NULL)
+      return Mock.gpioRead_FinalReturn;
+    memcpy(&Mock.gpioRead_FinalReturn, &cmock_call_instance->ReturnVal, sizeof(_Bool));
+    return cmock_call_instance->ReturnVal;
+  }
+  if (Mock.gpioRead_CallbackFunctionPointer != NULL)
+  {
+    return Mock.gpioRead_CallbackFunctionPointer(pin, Mock.gpioRead_CallbackCalls++);
+  }
+  UNITY_TEST_ASSERT_NOT_NULL(cmock_call_instance, cmock_line, CMockStringCalledMore);
+  cmock_line = cmock_call_instance->LineNumber;
+  if (cmock_call_instance->CallOrder > ++GlobalVerifyOrder)
+    UNITY_TEST_FAIL(cmock_line, CMockStringCalledEarly);
+  if (cmock_call_instance->CallOrder < GlobalVerifyOrder)
+    UNITY_TEST_FAIL(cmock_line, CMockStringCalledLate);
+  {
+    UNITY_SET_DETAILS(CMockString_gpioRead,CMockString_pin);
+    UNITY_TEST_ASSERT_EQUAL_MEMORY((void*)(&cmock_call_instance->Expected_pin), (void*)(&pin), sizeof(gpioMap_t), cmock_line, CMockStringMismatch);
+  }
+  UNITY_CLR_DETAILS();
+  return cmock_call_instance->ReturnVal;
+}
+
+void CMockExpectParameters_gpioRead(CMOCK_gpioRead_CALL_INSTANCE* cmock_call_instance, gpioMap_t pin)
+{
+  memcpy(&cmock_call_instance->Expected_pin, &pin, sizeof(gpioMap_t));
+}
+
+void gpioRead_CMockIgnoreAndReturn(UNITY_LINE_TYPE cmock_line, _Bool cmock_to_return)
+{
+  CMOCK_MEM_INDEX_TYPE cmock_guts_index = CMock_Guts_MemNew(sizeof(CMOCK_gpioRead_CALL_INSTANCE));
+  CMOCK_gpioRead_CALL_INSTANCE* cmock_call_instance = (CMOCK_gpioRead_CALL_INSTANCE*)CMock_Guts_GetAddressFor(cmock_guts_index);
+  UNITY_TEST_ASSERT_NOT_NULL(cmock_call_instance, cmock_line, CMockStringOutOfMemory);
+  memset(cmock_call_instance, 0, sizeof(*cmock_call_instance));
+  Mock.gpioRead_CallInstance = CMock_Guts_MemChain(Mock.gpioRead_CallInstance, cmock_guts_index);
+  Mock.gpioRead_IgnoreBool = (int)0;
+  cmock_call_instance->LineNumber = cmock_line;
+  cmock_call_instance->ReturnVal = cmock_to_return;
+  Mock.gpioRead_IgnoreBool = (int)1;
+}
+
+void gpioRead_CMockExpectAndReturn(UNITY_LINE_TYPE cmock_line, gpioMap_t pin, _Bool cmock_to_return)
+{
+  CMOCK_MEM_INDEX_TYPE cmock_guts_index = CMock_Guts_MemNew(sizeof(CMOCK_gpioRead_CALL_INSTANCE));
+  CMOCK_gpioRead_CALL_INSTANCE* cmock_call_instance = (CMOCK_gpioRead_CALL_INSTANCE*)CMock_Guts_GetAddressFor(cmock_guts_index);
+  UNITY_TEST_ASSERT_NOT_NULL(cmock_call_instance, cmock_line, CMockStringOutOfMemory);
+  memset(cmock_call_instance, 0, sizeof(*cmock_call_instance));
+  Mock.gpioRead_CallInstance = CMock_Guts_MemChain(Mock.gpioRead_CallInstance, cmock_guts_index);
+  Mock.gpioRead_IgnoreBool = (int)0;
+  cmock_call_instance->LineNumber = cmock_line;
+  cmock_call_instance->CallOrder = ++GlobalExpectCount;
+  CMockExpectParameters_gpioRead(cmock_call_instance, pin);
+  memcpy(&cmock_call_instance->ReturnVal, &cmock_to_return, sizeof(_Bool));
+  UNITY_CLR_DETAILS();
+}
+
+void gpioRead_StubWithCallback(CMOCK_gpioRead_CALLBACK Callback)
+{
+  Mock.gpioRead_IgnoreBool = (int)0;
+  Mock.gpioRead_CallbackFunctionPointer = Callback;
 }
 

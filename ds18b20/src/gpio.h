@@ -14,5 +14,6 @@ typedef enum {
 
 bool gpioConfig( gpioMap_t pin, gpioInit_t config );
 bool gpioWrite( gpioMap_t pin, bool value );
+bool gpioRead( gpioMap_t pin );
 
 #endif /* #ifndef GPIO_H_ */

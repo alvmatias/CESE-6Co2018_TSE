@@ -61,3 +61,24 @@ void testWriteOneByteToSensor(){
 	}
 	oneWireSensorWriteByte(&me, SKIP_ROM);
 }
+
+
+void testReadOneByteFromSensor(){
+	uint8_t i;
+	for(i=0; i<8; i++){
+		gpioConfig_ExpectAndReturn(GPIO0, GPIO_OUTPUT, true);
+		gpioWrite_ExpectAndReturn(GPIO0, false, true);
+		delayInaccurateUs_Expect(10);
+		gpioConfig_ExpectAndReturn(GPIO0, GPIO_INPUT, true);
+		delayInaccurateUs_Expect(12);
+		if(i%2){
+			gpioRead_ExpectAndReturn(GPIO0, true);
+		}
+		else{
+			gpioRead_ExpectAndReturn(GPIO0, false);
+		}
+		delayInaccurateUs_Expect(50);	
+	}
+	TEST_ASSERT_EQUAL_HEX8(0xAA, oneWireSensorReadByte(&me));
+}
+

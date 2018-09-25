@@ -38,3 +38,9 @@ _Bool
                               _Bool 
 
                                    value );
+
+
+
+_Bool 
+
+    gpioRead( gpioMap_t pin );

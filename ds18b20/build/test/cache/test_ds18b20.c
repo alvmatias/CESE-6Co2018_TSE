@@ -140,3 +140,71 @@ void testWriteOneByteToSensor(){
  oneWireSensorWriteByte(&me, SKIP_ROM);
 
 }
+
+
+
+
+
+void testReadOneByteFromSensor(){
+
+ uint8_t i;
+
+ for(i=0; i<8; i++){
+
+  gpioConfig_CMockExpectAndReturn(69, GPIO0, GPIO_OUTPUT, 
+
+ 1
+
+ );
+
+  gpioWrite_CMockExpectAndReturn(70, GPIO0, 
+
+ 0
+
+ , 
+
+ 1
+
+ );
+
+  delayInaccurateUs_CMockExpect(71, 10);
+
+  gpioConfig_CMockExpectAndReturn(72, GPIO0, GPIO_INPUT, 
+
+ 1
+
+ );
+
+  delayInaccurateUs_CMockExpect(73, 12);
+
+  if(i%2){
+
+   gpioRead_CMockExpectAndReturn(75, GPIO0, 
+
+  1
+
+  );
+
+  }
+
+  else{
+
+   gpioRead_CMockExpectAndReturn(78, GPIO0, 
+
+  0
+
+  );
+
+  }
+
+  delayInaccurateUs_CMockExpect(80, 50);
+
+ }
+
+ UnityAssertEqualNumber((UNITY_INT)(UNITY_INT8 )((0xAA)), (UNITY_INT)(UNITY_INT8 )((oneWireSensorReadByte(&me))), (
+
+((void *)0)
+
+), (UNITY_UINT)(82), UNITY_DISPLAY_STYLE_HEX8);
+
+}

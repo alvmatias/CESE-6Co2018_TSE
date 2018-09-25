@@ -35,6 +35,12 @@ void gpioWrite_CMockIgnoreAndReturn(UNITY_LINE_TYPE cmock_line, _Bool cmock_to_r
 void gpioWrite_CMockExpectAndReturn(UNITY_LINE_TYPE cmock_line, gpioMap_t pin, _Bool value, _Bool cmock_to_return);
 typedef _Bool (* CMOCK_gpioWrite_CALLBACK)(gpioMap_t pin, _Bool value, int cmock_num_calls);
 void gpioWrite_StubWithCallback(CMOCK_gpioWrite_CALLBACK Callback);
+#define gpioRead_IgnoreAndReturn(cmock_retval) gpioRead_CMockIgnoreAndReturn(__LINE__, cmock_retval)
+void gpioRead_CMockIgnoreAndReturn(UNITY_LINE_TYPE cmock_line, _Bool cmock_to_return);
+#define gpioRead_ExpectAndReturn(pin, cmock_retval) gpioRead_CMockExpectAndReturn(__LINE__, pin, cmock_retval)
+void gpioRead_CMockExpectAndReturn(UNITY_LINE_TYPE cmock_line, gpioMap_t pin, _Bool cmock_to_return);
+typedef _Bool (* CMOCK_gpioRead_CALLBACK)(gpioMap_t pin, int cmock_num_calls);
+void gpioRead_StubWithCallback(CMOCK_gpioRead_CALLBACK Callback);
 
 #if defined(__GNUC__) && !defined(__ICC) && !defined(__TMS470__)
 #if __GNUC__ > 4 || (__GNUC__ == 4 && (__GNUC_MINOR__ > 6 || (__GNUC_MINOR__ == 6 && __GNUC_PATCHLEVEL__ > 0)))

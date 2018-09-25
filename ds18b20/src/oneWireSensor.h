@@ -96,8 +96,9 @@ typedef struct{
 
 /*==================[external functions declaration]=========================*/
 /**
-* @fn void oneWireSensorInit(oneWireSensorResolution_t resolution, gpioMap_t gpio)
+* @fn void oneWireSensorInit(oneWireSensor_t *me, oneWireSensorResolution_t resolution, gpioMap_t gpio)
 * @brief Inicializacion de la estructura de datos del sensor oneWire.
+* @param me 		: Estructura de datos del sensor a inicializar.
 * @param resolution : Resolucion en bits a utilizar.
 * @param gpio 		: GPIO asociado al bus de datos utilizado por el sensor.
 * @return Nada.
@@ -105,11 +106,20 @@ typedef struct{
 void oneWireSensorInit(oneWireSensor_t *me, oneWireSensorResolution_t resolution, gpioMap_t gpio);
 
 /**
-* @fn void oneWireSensorWriteByte(oneWireSensorCommand_t command)
+* @fn void oneWireSensorWriteByte(oneWireSensor_t *me, oneWireSensorCommand_t command)
 * @brief Escritura de un byte al sensor
+* @param me 	 : Estructura de datos del sensor a escribir un byte.
 * @param command : Comando a enviar.
 * @return Nada.
 */
 void oneWireSensorWriteByte(oneWireSensor_t *me, oneWireSensorCommand_t command);
+
+/**
+* @fn uint8_t oneWireSensorReadByte(oneWireSensor_t *me)
+* @param me : Estructura de datos del sensor a leer un byte.
+* @brief Lectura de 1 byte del sensor. 
+* @return El byte leido.
+*/
+uint8_t oneWireSensorReadByte(oneWireSensor_t *me);
 /*==================[end of file]============================================*/
 #endif /* #ifndef _ONE_WIRE_SENSOR_H_ */

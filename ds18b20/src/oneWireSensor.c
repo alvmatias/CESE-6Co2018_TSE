@@ -27,8 +27,9 @@ static const oneWireSensorOperation_t operation[MAX_RESOLUTIONS] = {
 
 /*==================[internal functions definition]==========================*/
 /**
-* @fn static void oneWireSensorWriteBit(uint8_t bit)
+* @fn static void oneWireSensorWriteBit(oneWireSensor_t *me, uint8_t bit)
 * @brief Escritura de 1 bit del sensor 
+* @param me  : Estructura de datos del sensor a escribir un bit.
 * @param bit : Bit a escribir.
 * @return Nada.
 * @note Funcion privada.
@@ -55,6 +56,36 @@ static void oneWireSensorWriteBit(oneWireSensor_t *me, uint8_t bit){
 	}
 }
 
+/**
+* @fn static uint8_t oneWireSensorReadBit(oneWireSensor_t *me)
+* @brief Lectura de 1 bit del sensor 
+* @param me : Estructura de datos del sensor a leer un bit.
+* @return El bit leido.
+* @note Funcion privada.
+*/
+static uint8_t oneWireSensorReadBit(oneWireSensor_t *me){
+	uint8_t bit = 0;  /** bit : Bit leido del sensor */
+
+	/* Configuracion del GPIO como OUTPUT */
+	gpioConfig(me->gpio, GPIO_OUTPUT);		
+	/* Seteado del bus en bajo por al menos 1us*/
+	gpioWrite(me->gpio, false);
+	delayInaccurateUs(10);
+	/* Configuracion del GPIO como entrada para liberarlo */
+	gpioConfig(me->gpio, GPIO_INPUT);		
+	/* Se espera hasta que el valor en el bus es valido*/
+	delayInaccurateUs(12);
+	/* Lectura del GPIO */
+	if(gpioRead(me->gpio)){
+		bit = 1;   /* Se leyo un 1 */
+	} 
+	/* Else -> No hacer nada -> Un cero fue leido */
+	/* Se espera a que el sensor libere el bus */
+	delayInaccurateUs(50);
+
+	return bit;
+}
+
 /*==================[external functions definition]==========================*/
 void oneWireSensorInit(oneWireSensor_t *me, oneWireSensorResolution_t resolution, gpioMap_t gpio){
 	me->operation.resolution = operation[resolution - NINE_BITS_RESOLUTION].resolution;
@@ -71,6 +102,17 @@ void oneWireSensorWriteByte(oneWireSensor_t *me, oneWireSensorCommand_t command)
 		oneWireSensorWriteBit(me, command & BIT_MASK);
 		command = command >> 1;	
 	}
+}
+
+uint8_t oneWireSensorReadByte(oneWireSensor_t *me){
+	uint8_t currentBit;  /** currentBit : Numero actual de bit leido */
+	uint8_t byte = 0;    /** byte : Byte leido */
+	/* Por cada bit dentro del byte */
+	for (currentBit = 0; currentBit < 8; currentBit++){
+		/* Se lee un bit y se hace un corrimiento */
+		byte = byte | (oneWireSensorReadBit(me) << currentBit);
+	}
+	return byte;
 }
 
 /*==================[end of file]============================================*/
