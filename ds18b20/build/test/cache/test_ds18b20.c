@@ -7,11 +7,17 @@
 
 
 
+
+
 oneWireSensor_t me;
 
 
 
-void setUp(){
+void resetTest(void);
+
+
+
+void setUp(void){
 
  oneWireSensorInit(&me, NINE_BITS_RESOLUTION, GPIO0);
 
@@ -19,7 +25,7 @@ void setUp(){
 
 
 
-void cleanup(){
+void cleanup(void){
 
 
 
@@ -33,13 +39,13 @@ void setExpectedDataToWriteOneByteFunction(oneWireSensorCommand_t command){
 
  for(i=0; i<8; i++){
 
-  gpioConfig_CMockExpectAndReturn(20, GPIO0, GPIO_OUTPUT, 
+  gpioConfig_CMockExpectAndReturn(23, GPIO0, GPIO_OUTPUT, 
 
  1
 
  );
 
-  gpioWrite_CMockExpectAndReturn(21, GPIO0, 
+  gpioWrite_CMockExpectAndReturn(24, GPIO0, 
 
  0
 
@@ -51,29 +57,29 @@ void setExpectedDataToWriteOneByteFunction(oneWireSensorCommand_t command){
 
   if(command & 0x01){
 
-   delayInaccurateUs_CMockExpect(23, 10);
+   delayInaccurateUs_CMockExpect(26, 10);
 
-   gpioConfig_CMockExpectAndReturn(24, GPIO0, GPIO_INPUT, 
+   gpioConfig_CMockExpectAndReturn(27, GPIO0, GPIO_INPUT, 
 
   1
 
   );
 
-   delayInaccurateUs_CMockExpect(25, 52);
+   delayInaccurateUs_CMockExpect(28, 52);
 
   }
 
   else{
 
-   delayInaccurateUs_CMockExpect(28, 60);
+   delayInaccurateUs_CMockExpect(31, 60);
 
-   gpioConfig_CMockExpectAndReturn(29, GPIO0, GPIO_INPUT, 
+   gpioConfig_CMockExpectAndReturn(32, GPIO0, GPIO_INPUT, 
 
   1
 
   );
 
-   delayInaccurateUs_CMockExpect(30, 2);
+   delayInaccurateUs_CMockExpect(33, 2);
 
   }
 
@@ -91,13 +97,13 @@ void setExpectedDataToReadOneByteFunction(uint8_t readByte){
 
  for(i=0; i<8; i++){
 
-  gpioConfig_CMockExpectAndReturn(39, GPIO0, GPIO_OUTPUT, 
+  gpioConfig_CMockExpectAndReturn(42, GPIO0, GPIO_OUTPUT, 
 
  1
 
  );
 
-  gpioWrite_CMockExpectAndReturn(40, GPIO0, 
+  gpioWrite_CMockExpectAndReturn(43, GPIO0, 
 
  0
 
@@ -107,19 +113,19 @@ void setExpectedDataToReadOneByteFunction(uint8_t readByte){
 
  );
 
-  delayInaccurateUs_CMockExpect(41, 10);
+  delayInaccurateUs_CMockExpect(44, 10);
 
-  gpioConfig_CMockExpectAndReturn(42, GPIO0, GPIO_INPUT, 
+  gpioConfig_CMockExpectAndReturn(45, GPIO0, GPIO_INPUT, 
 
  1
 
  );
 
-  delayInaccurateUs_CMockExpect(43, 12);
+  delayInaccurateUs_CMockExpect(46, 12);
 
   if(readByte & 0x01){
 
-   gpioRead_CMockExpectAndReturn(45, GPIO0, 
+   gpioRead_CMockExpectAndReturn(48, GPIO0, 
 
   1
 
@@ -129,7 +135,7 @@ void setExpectedDataToReadOneByteFunction(uint8_t readByte){
 
   else{
 
-   gpioRead_CMockExpectAndReturn(48, GPIO0, 
+   gpioRead_CMockExpectAndReturn(51, GPIO0, 
 
   0
 
@@ -137,7 +143,7 @@ void setExpectedDataToReadOneByteFunction(uint8_t readByte){
 
   }
 
-  delayInaccurateUs_CMockExpect(50, 50);
+  delayInaccurateUs_CMockExpect(53, 50);
 
   readByte = readByte >> 1;
 
@@ -149,13 +155,13 @@ void setExpectedDataToReadOneByteFunction(uint8_t readByte){
 
 void setExpectedDataToResetFunction(uint8_t presencePulse){
 
- gpioConfig_CMockExpectAndReturn(56, GPIO0, GPIO_OUTPUT, 
+ gpioConfig_CMockExpectAndReturn(59, GPIO0, GPIO_OUTPUT, 
 
 1
 
 );
 
- gpioWrite_CMockExpectAndReturn(57, GPIO0, 
+ gpioWrite_CMockExpectAndReturn(60, GPIO0, 
 
 0
 
@@ -165,19 +171,19 @@ void setExpectedDataToResetFunction(uint8_t presencePulse){
 
 );
 
- delayInaccurateUs_CMockExpect(58, 480);
+ delayInaccurateUs_CMockExpect(61, 480);
 
- gpioConfig_CMockExpectAndReturn(59, GPIO0, GPIO_INPUT, 
+ gpioConfig_CMockExpectAndReturn(62, GPIO0, GPIO_INPUT, 
 
 1
 
 );
 
- delayInaccurateUs_CMockExpect(60, 80);
+ delayInaccurateUs_CMockExpect(63, 80);
 
  if(!presencePulse){
 
-  gpioRead_CMockExpectAndReturn(62, GPIO0, 
+  gpioRead_CMockExpectAndReturn(65, GPIO0, 
 
  0
 
@@ -187,7 +193,7 @@ void setExpectedDataToResetFunction(uint8_t presencePulse){
 
  else{
 
-  gpioRead_CMockExpectAndReturn(65, GPIO0, 
+  gpioRead_CMockExpectAndReturn(68, GPIO0, 
 
  1
 
@@ -195,7 +201,7 @@ void setExpectedDataToResetFunction(uint8_t presencePulse){
 
  }
 
- delayInaccurateUs_CMockExpect(67, 400);
+ delayInaccurateUs_CMockExpect(70, 400);
 
 }
 
@@ -237,15 +243,15 @@ void testSensorReadyToWorkAfterInit(){
 
   oneWireSensorInit(&me, NINE_BITS_RESOLUTION + i, GPIO0 + i);
 
-  UnityAssertEqualNumber((UNITY_INT)(UNITY_INT32)((NINE_BITS_RESOLUTION + i)), (UNITY_INT)(UNITY_INT32)((me.operation.resolution)), ((msg)), (UNITY_UINT)(88), UNITY_DISPLAY_STYLE_INT32);
+  UnityAssertEqualNumber((UNITY_INT)(UNITY_INT32)((NINE_BITS_RESOLUTION + i)), (UNITY_INT)(UNITY_INT32)((me.operation.resolution)), ((msg)), (UNITY_UINT)(91), UNITY_DISPLAY_STYLE_INT32);
 
-  UnityAssertFloatsWithin((UNITY_FLOAT)((UNITY_FLOAT)((oneWireSensorStep[i])) * (UNITY_FLOAT)(0.00001f)), (UNITY_FLOAT)((UNITY_FLOAT)((oneWireSensorStep[i]))), (UNITY_FLOAT)((UNITY_FLOAT)((me.operation.step))), (((msg))), (UNITY_UINT)((UNITY_UINT)(89)));
+  UnityAssertFloatsWithin((UNITY_FLOAT)((UNITY_FLOAT)((oneWireSensorStep[i])) * (UNITY_FLOAT)(0.00001f)), (UNITY_FLOAT)((UNITY_FLOAT)((oneWireSensorStep[i]))), (UNITY_FLOAT)((UNITY_FLOAT)((me.operation.step))), (((msg))), (UNITY_UINT)((UNITY_UINT)(92)));
 
-  UnityAssertEqualNumber((UNITY_INT)(UNITY_INT32)((oneWireSensorDelay[i])), (UNITY_INT)(UNITY_INT32)((me.operation.delay)), ((msg)), (UNITY_UINT)(90), UNITY_DISPLAY_STYLE_INT32);
+  UnityAssertEqualNumber((UNITY_INT)(UNITY_INT32)((oneWireSensorDelay[i])), (UNITY_INT)(UNITY_INT32)((me.operation.delay)), ((msg)), (UNITY_UINT)(93), UNITY_DISPLAY_STYLE_INT32);
 
-  UnityAssertEqualNumber((UNITY_INT)(UNITY_INT32)((oneWireSensorMask[i])), (UNITY_INT)(UNITY_INT32)((me.operation.mask)), ((msg)), (UNITY_UINT)(91), UNITY_DISPLAY_STYLE_INT32);
+  UnityAssertEqualNumber((UNITY_INT)(UNITY_INT32)((oneWireSensorMask[i])), (UNITY_INT)(UNITY_INT32)((me.operation.mask)), ((msg)), (UNITY_UINT)(94), UNITY_DISPLAY_STYLE_INT32);
 
-  UnityAssertEqualNumber((UNITY_INT)(UNITY_INT32)((GPIO0 + i)), (UNITY_INT)(UNITY_INT32)((me.gpio)), ((msg)), (UNITY_UINT)(92), UNITY_DISPLAY_STYLE_INT32);
+  UnityAssertEqualNumber((UNITY_INT)(UNITY_INT32)((GPIO0 + i)), (UNITY_INT)(UNITY_INT32)((me.gpio)), ((msg)), (UNITY_UINT)(95), UNITY_DISPLAY_STYLE_INT32);
 
  }
 
@@ -273,7 +279,7 @@ void testReadOneByteFromSensor(){
 
 ((void *)0)
 
-), (UNITY_UINT)(104), UNITY_DISPLAY_STYLE_HEX8);
+), (UNITY_UINT)(107), UNITY_DISPLAY_STYLE_HEX8);
 
 }
 
@@ -295,7 +301,7 @@ void testResetSensor(){
 
 ((void *)0)
 
-), (UNITY_UINT)(109), UNITY_DISPLAY_STYLE_INT);
+), (UNITY_UINT)(112), UNITY_DISPLAY_STYLE_INT);
 
  setExpectedDataToResetFunction(
 
@@ -311,6 +317,98 @@ void testResetSensor(){
 
 ((void *)0)
 
-), (UNITY_UINT)(111), UNITY_DISPLAY_STYLE_INT);
+), (UNITY_UINT)(114), UNITY_DISPLAY_STYLE_INT);
+
+}
+
+
+
+void testFillSensorScratchpad(){
+
+ uint8_t i;
+
+
+
+ setExpectedDataToResetFunction(
+
+                               1
+
+                                   );
+
+ UnityAssertEqualNumber((UNITY_INT)((
+
+0
+
+)), (UNITY_INT)((oneWireSensorFillScratchpad(&me))), (("Primer Caso")), (UNITY_UINT)(121), UNITY_DISPLAY_STYLE_INT);
+
+ resetTest();
+
+
+
+ setExpectedDataToResetFunction(
+
+                               0
+
+                                    );
+
+ setExpectedDataToWriteOneByteFunction(SKIP_ROM);
+
+ setExpectedDataToWriteOneByteFunction(CONVERT_T);
+
+ delay_CMockExpect(127, NINE_BITS_RESOLUTION_DELAY);
+
+ setExpectedDataToResetFunction(
+
+                               1
+
+                                   );
+
+ UnityAssertEqualNumber((UNITY_INT)((
+
+0
+
+)), (UNITY_INT)((oneWireSensorFillScratchpad(&me))), (("Segundo Caso")), (UNITY_UINT)(129), UNITY_DISPLAY_STYLE_INT);
+
+ resetTest();
+
+
+
+ setExpectedDataToResetFunction(
+
+                               0
+
+                                    );
+
+ setExpectedDataToWriteOneByteFunction(SKIP_ROM);
+
+ setExpectedDataToWriteOneByteFunction(CONVERT_T);
+
+ delay_CMockExpect(135, NINE_BITS_RESOLUTION_DELAY);
+
+ setExpectedDataToResetFunction(
+
+                               0
+
+                                    );
+
+ setExpectedDataToWriteOneByteFunction(SKIP_ROM);
+
+ setExpectedDataToWriteOneByteFunction(READ_SCRATCHPAD);
+
+
+
+ for(i=0; i<9; i++){
+
+  setExpectedDataToReadOneByteFunction(0xAA);
+
+ }
+
+
+
+ UnityAssertEqualNumber((UNITY_INT)((
+
+1
+
+)), (UNITY_INT)((oneWireSensorFillScratchpad(&me))), (("Tercer Caso")), (UNITY_UINT)(144), UNITY_DISPLAY_STYLE_INT);
 
 }

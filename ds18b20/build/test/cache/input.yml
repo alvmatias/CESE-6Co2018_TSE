@@ -39,7 +39,8 @@
 - :rake_columns: '120'
 :defines:
   :test:
-  - &1 []
+  - &1
+    - CMOCK_MEM_DYNAMIC
   - TEST
   :test_preprocess:
   - *1
@@ -47,7 +48,8 @@
   :release: []
   :release_preprocess: []
   :use_test_definition: false
-  :commmon: []
+  :commmon:
+  - CMOCK_MEM_DYNAMIC
 :libraries:
   :test:
   - &2 []

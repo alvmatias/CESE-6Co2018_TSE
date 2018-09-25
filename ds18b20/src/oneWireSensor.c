@@ -141,5 +141,30 @@ oneWireSensorError_t oneWireSensorReset(oneWireSensor_t *me){
 	return error;
 }
 
-
+oneWireSensorError_t oneWireSensorFillScratchpad(oneWireSensor_t *me){	
+	uint8_t currentByte;  					/** currentByte : Byte leido en cada momento*/
+	/* Reset Sensor */
+	if(ONE_WIRE_SENSOR_WORKING == oneWireSensorReset(me)){
+		/* Skip ROM */
+		oneWireSensorWriteByte(me, SKIP_ROM);
+		/* Conversion Temperatura */
+		oneWireSensorWriteByte(me, CONVERT_T);
+		/* Espera tiempo conversion */
+		delay(me->operation.delay);
+		/* Reset Sensor */
+		if(ONE_WIRE_SENSOR_WORKING == oneWireSensorReset(me)){
+			/* Skip ROM */
+			oneWireSensorWriteByte(me, SKIP_ROM);
+			/* Lectura SRAM SCRATCHPAD */
+			oneWireSensorWriteByte(me, READ_SCRATCHPAD);
+			/* Llenado del SCRATCHPAD y calculo CRC */
+			for(currentByte = 0; currentByte < SCRATCHPAD_LENGTH; currentByte++){
+				me->scratchpad[currentByte] = oneWireSensorReadByte(me);
+			}
+			return ONE_WIRE_SENSOR_WORKING;
+		}
+		else return ONE_WIRE_SENSOR_NOT_WORKING;
+	}
+	else return ONE_WIRE_SENSOR_NOT_WORKING;
+}
 /*==================[end of file]============================================*/

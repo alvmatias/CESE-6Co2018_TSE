@@ -18,6 +18,12 @@
 * @brief Maxima cantidad de resoluciones soportadas por el sensor OneWire.
 */
 #define MAX_RESOLUTIONS					4
+
+/**
+* @def SCRATCHPAD_LENGTH
+* @brief Tamaño del SCRATCHPAD del sensor OneWire.
+*/
+#define SCRATCHPAD_LENGTH 				9
 /*==================[typedef]================================================*/
 /**
 * @enum oneWireSensorError_t
@@ -37,6 +43,22 @@ typedef enum{
 	SKIP_ROM = 0xCC, 			/**< Descarte de ROM */
 	READ_SCRATCHPAD = 0xBE		/**< Lectura de SCRATCHPAD */
 } oneWireSensorCommand_t;
+
+/**
+* @enum scratchpadByte_t
+* @brief Descripcion de cada byte del SCRATCHPAD
+*/
+typedef enum{
+	SCRATCHPAD_TEMPERATURE_LSB = 0,  		/**< LSB del valor de la temperatura */
+	SCRATCHPAD_TEMPERATURE_MSB = 1,			/**< MSB del valor de la temperatura */
+	SCRATCHPAD_TH_REGISTER = 2,				/**< Registro de alarma de temperatura alta */
+	SCRATCHPAD_TL_REGISTER = 3,				/**< Registro de alarma de temperatura baja */
+	SCRATCHPAD_CONFIGURATION_REGISTER = 4,	/**< Registro de configuracion */
+	SCRATCHPAD_RESERVED_1 = 5,				/**< Reservado 1 */
+	SCRATCHPAD_RESERVED_2 = 6,				/**< Reservado 2 */
+	SCRATCHPAD_RESERVED_3 = 7,  			/**< Reservado 3 */
+	SCRATCHPAD_CRC_BYTE = 8					/**< CRC8 */
+}scratchpadByte_t;
 
 /**
 * @enum oneWireSensorResolution_t
@@ -100,6 +122,7 @@ typedef struct{
 typedef struct{
 	oneWireSensorOperation_t operation; 			/**< Estructura de datos de operacion del sensor */
 	gpioMap_t gpio;									/**< GPIO asociado al bus de datos utilizados por el sensor */
+	uint8_t scratchpad[SCRATCHPAD_LENGTH];			/**< SRAM scratchpad asociada al sensor */
 }oneWireSensor_t;
 /*==================[external data declaration]==============================*/
 
@@ -138,6 +161,14 @@ uint8_t oneWireSensorReadByte(oneWireSensor_t *me);
 * @return SENSOR_WORKING si el sensor contesto con el pulso de presencia, SENSOR_NOT_WORKING caso contrario.
 */
 oneWireSensorError_t oneWireSensorReset(oneWireSensor_t *me);
+
+/**
+* @fn oneWireSensorError_t oneWireSensorFillScratchpad()
+* @brief Carga del SCRATCHPAD asociado al sensor a partir de los datos recibidos por parte del sensor.
+* @param me : Estructura de datos del sensor a rellenar su SCRATCHPAD
+* @return ONE_WIRE_SENSOR_NOT_WORKING si hubo un error en el llenado del scratchpad, ONE_WIRE_SENSOR_WORKING caso contrario.
+*/
+oneWireSensorError_t oneWireSensorFillScratchpad(oneWireSensor_t *me);
 
 /*==================[end of file]============================================*/
 #endif /* #ifndef _ONE_WIRE_SENSOR_H_ */

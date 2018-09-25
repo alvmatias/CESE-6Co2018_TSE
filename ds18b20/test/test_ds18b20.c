@@ -4,13 +4,16 @@
 #include "mock_delay.h"
 #include <stdbool.h>
 
+
 oneWireSensor_t me;
 
-void setUp(){
+void resetTest(void);
+
+void setUp(void){
 	oneWireSensorInit(&me, NINE_BITS_RESOLUTION, GPIO0);
 }
 
-void cleanup(){
+void cleanup(void){
 
 }
 
@@ -111,4 +114,32 @@ void testResetSensor(){
 	TEST_ASSERT_EQUAL(false, oneWireSensorReset(&me));
 }
 
+void testFillSensorScratchpad(){
+	uint8_t i;
+	/* Primer caso: Primer RESET falla */
+	setExpectedDataToResetFunction(true);
+	TEST_ASSERT_EQUAL_MESSAGE(false, oneWireSensorFillScratchpad(&me), "Primer Caso");
+	resetTest();
+	/* Segundo caso: Segundo RESET falla */
+	setExpectedDataToResetFunction(false);
+	setExpectedDataToWriteOneByteFunction(SKIP_ROM);
+	setExpectedDataToWriteOneByteFunction(CONVERT_T);
+	delay_Expect(NINE_BITS_RESOLUTION_DELAY);
+	setExpectedDataToResetFunction(true);
+	TEST_ASSERT_EQUAL_MESSAGE(false, oneWireSensorFillScratchpad(&me), "Segundo Caso");
+	resetTest();
+	/* Tercer caso: Todo funciona */
+	setExpectedDataToResetFunction(false);
+	setExpectedDataToWriteOneByteFunction(SKIP_ROM);
+	setExpectedDataToWriteOneByteFunction(CONVERT_T);
+	delay_Expect(NINE_BITS_RESOLUTION_DELAY);
+	setExpectedDataToResetFunction(false);
+	setExpectedDataToWriteOneByteFunction(SKIP_ROM);
+	setExpectedDataToWriteOneByteFunction(READ_SCRATCHPAD);
 
+	for(i=0; i<SCRATCHPAD_LENGTH; i++){
+		setExpectedDataToReadOneByteFunction(0xAA);
+	}
+
+	TEST_ASSERT_EQUAL_MESSAGE(true, oneWireSensorFillScratchpad(&me), "Tercer Caso");
+}
