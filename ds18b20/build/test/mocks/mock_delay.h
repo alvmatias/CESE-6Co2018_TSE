@@ -29,6 +29,12 @@ void delayInaccurateUs_CMockIgnore(void);
 void delayInaccurateUs_CMockExpect(UNITY_LINE_TYPE cmock_line, uint32_t delay);
 typedef void (* CMOCK_delayInaccurateUs_CALLBACK)(uint32_t delay, int cmock_num_calls);
 void delayInaccurateUs_StubWithCallback(CMOCK_delayInaccurateUs_CALLBACK Callback);
+#define delay_Ignore() delay_CMockIgnore()
+void delay_CMockIgnore(void);
+#define delay_Expect(delay) delay_CMockExpect(__LINE__, delay)
+void delay_CMockExpect(UNITY_LINE_TYPE cmock_line, uint32_t delay);
+typedef void (* CMOCK_delay_CALLBACK)(uint32_t delay, int cmock_num_calls);
+void delay_StubWithCallback(CMOCK_delay_CALLBACK Callback);
 
 #if defined(__GNUC__) && !defined(__ICC) && !defined(__TMS470__)
 #if __GNUC__ > 4 || (__GNUC__ == 4 && (__GNUC_MINOR__ > 6 || (__GNUC_MINOR__ == 6 && __GNUC_PATCHLEVEL__ > 0)))

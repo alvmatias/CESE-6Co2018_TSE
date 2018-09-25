@@ -20,6 +20,15 @@
 #define MAX_RESOLUTIONS					4
 /*==================[typedef]================================================*/
 /**
+* @enum oneWireSensorError_t
+* @brief Estado funcionamiento del sensor OneWire.
+*/
+typedef enum{
+	ONE_WIRE_SENSOR_NOT_WORKING = 0, 	/**< Sensor OneWire No Funcionando */
+	ONE_WIRE_SENSOR_WORKING = 1			/**< Sensor OneWire Funcionando */
+}oneWireSensorError_t;
+
+/**
 * @enum oneWireSensorCommand_t
 * @brief Comandos para el sensor OneWire ds18b20.
 */
@@ -121,5 +130,14 @@ void oneWireSensorWriteByte(oneWireSensor_t *me, oneWireSensorCommand_t command)
 * @return El byte leido.
 */
 uint8_t oneWireSensorReadByte(oneWireSensor_t *me);
+
+/**
+* @fn sensorFunctionalState_t oneWireSensorReset()
+* @brief Reseteo y deteccion del estado del sensor
+* @param me : Estructura de datos del sensor a resetear.
+* @return SENSOR_WORKING si el sensor contesto con el pulso de presencia, SENSOR_NOT_WORKING caso contrario.
+*/
+oneWireSensorError_t oneWireSensorReset(oneWireSensor_t *me);
+
 /*==================[end of file]============================================*/
 #endif /* #ifndef _ONE_WIRE_SENSOR_H_ */

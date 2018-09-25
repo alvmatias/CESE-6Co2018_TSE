@@ -86,6 +86,7 @@ static uint8_t oneWireSensorReadBit(oneWireSensor_t *me){
 	return bit;
 }
 
+
 /*==================[external functions definition]==========================*/
 void oneWireSensorInit(oneWireSensor_t *me, oneWireSensorResolution_t resolution, gpioMap_t gpio){
 	me->operation.resolution = operation[resolution - NINE_BITS_RESOLUTION].resolution;
@@ -114,5 +115,31 @@ uint8_t oneWireSensorReadByte(oneWireSensor_t *me){
 	}
 	return byte;
 }
+
+oneWireSensorError_t oneWireSensorReset(oneWireSensor_t *me){
+	oneWireSensorError_t error;	/** error : Estado del sensor */
+	
+	/* Configuracion del GPIO como OUTPUT */
+	gpioConfig(me->gpio, GPIO_OUTPUT);		
+	/* Seteo del bus en bajo */
+	gpioWrite(me->gpio, false);
+	/* Liberacion del bus despues de 480us */
+	delayInaccurateUs(480);
+	/* Configuracion del GPIO como entrada para liberar el bus */
+	gpioConfig(me->gpio, GPIO_INPUT);		
+	/* Espera de 80us para detectar el pulso de presencia del sensor */
+	delayInaccurateUs(80);
+	/* Lectura del bus para verificar si el sensor esta funcionando */
+	if(!gpioRead(me->gpio)){ /* Si el sensor seteo el bus en bajo es porque esta funcionando */
+		error = ONE_WIRE_SENSOR_WORKING;
+	}
+	else{ /* Si el bus sigue en alto producto de la resistencia de pullup es porque NO esta funcionando */
+		error = ONE_WIRE_SENSOR_NOT_WORKING;
+	}
+	/* Espera de 400us para que el sensor libere el bus */
+	delayInaccurateUs(400);
+	return error;
+}
+
 
 /*==================[end of file]============================================*/

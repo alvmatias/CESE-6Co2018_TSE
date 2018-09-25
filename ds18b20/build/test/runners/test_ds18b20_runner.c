@@ -45,6 +45,7 @@ extern void tearDown(void);
 extern void testSensorReadyToWorkAfterInit();
 extern void testWriteOneByteToSensor();
 extern void testReadOneByteFromSensor();
+extern void testResetSensor();
 
 
 /*=======Mock Management=====*/
@@ -102,9 +103,10 @@ int main(void)
 {
   suite_setup();
   UnityBegin("test_ds18b20.c");
-  RUN_TEST(testSensorReadyToWorkAfterInit, 18);
-  RUN_TEST(testWriteOneByteToSensor, 44);
-  RUN_TEST(testReadOneByteFromSensor, 66);
+  RUN_TEST(testSensorReadyToWorkAfterInit, 70);
+  RUN_TEST(testWriteOneByteToSensor, 96);
+  RUN_TEST(testReadOneByteFromSensor, 102);
+  RUN_TEST(testResetSensor, 107);
 
   CMock_Guts_MemFreeFinal();
   return suite_teardown(UnityEnd());

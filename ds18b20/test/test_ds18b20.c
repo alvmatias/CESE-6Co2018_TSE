@@ -14,6 +14,58 @@ void cleanup(){
 
 }
 
+void setExpectedDataToWriteOneByteFunction(oneWireSensorCommand_t command){
+	uint8_t i;
+	for(i=0; i<8; i++){
+		gpioConfig_ExpectAndReturn(GPIO0, GPIO_OUTPUT, true);
+		gpioWrite_ExpectAndReturn(GPIO0, false, true);
+		if(command & 0x01){
+			delayInaccurateUs_Expect(10);
+			gpioConfig_ExpectAndReturn(GPIO0, GPIO_INPUT, true);
+			delayInaccurateUs_Expect(52);
+		}
+		else{
+			delayInaccurateUs_Expect(60);
+			gpioConfig_ExpectAndReturn(GPIO0, GPIO_INPUT, true);
+			delayInaccurateUs_Expect(2);
+		}
+		command = command >> 1;	
+	}
+}
+
+void setExpectedDataToReadOneByteFunction(uint8_t readByte){
+	uint8_t i;
+	for(i=0; i<8; i++){
+		gpioConfig_ExpectAndReturn(GPIO0, GPIO_OUTPUT, true);
+		gpioWrite_ExpectAndReturn(GPIO0, false, true);
+		delayInaccurateUs_Expect(10);
+		gpioConfig_ExpectAndReturn(GPIO0, GPIO_INPUT, true);
+		delayInaccurateUs_Expect(12);
+		if(readByte & 0x01){
+			gpioRead_ExpectAndReturn(GPIO0, true);
+		}
+		else{
+			gpioRead_ExpectAndReturn(GPIO0, false);
+		}
+		delayInaccurateUs_Expect(50);	
+		readByte = readByte >> 1;
+	}
+}
+
+void setExpectedDataToResetFunction(uint8_t presencePulse){
+	gpioConfig_ExpectAndReturn(GPIO0, GPIO_OUTPUT, true);		
+	gpioWrite_ExpectAndReturn(GPIO0, false, true);
+	delayInaccurateUs_Expect(480);
+	gpioConfig_ExpectAndReturn(GPIO0, GPIO_INPUT, true);		
+	delayInaccurateUs_Expect(80);
+	if(!presencePulse){ 
+		gpioRead_ExpectAndReturn(GPIO0, false);
+	}
+	else{ 
+		gpioRead_ExpectAndReturn(GPIO0, true);
+	}
+	delayInaccurateUs_Expect(400);
+}
 
 void testSensorReadyToWorkAfterInit(){
 	oneWireSensor_t me;
@@ -42,43 +94,21 @@ void testSensorReadyToWorkAfterInit(){
 }
 
 void testWriteOneByteToSensor(){
-	uint8_t i;
-	oneWireSensorCommand_t command = SKIP_ROM;
-	for(i=0; i<8; i++){
-		gpioConfig_ExpectAndReturn(GPIO0, GPIO_OUTPUT, true);
-		gpioWrite_ExpectAndReturn(GPIO0, false, true);
-		if(command & 0x01){
-			delayInaccurateUs_Expect(10);
-			gpioConfig_ExpectAndReturn(GPIO0, GPIO_INPUT, true);
-			delayInaccurateUs_Expect(52);
-		}
-		else{
-			delayInaccurateUs_Expect(60);
-			gpioConfig_ExpectAndReturn(GPIO0, GPIO_INPUT, true);
-			delayInaccurateUs_Expect(2);
-		}
-		command = command >> 1;	
-	}
+	setExpectedDataToWriteOneByteFunction(SKIP_ROM);
 	oneWireSensorWriteByte(&me, SKIP_ROM);
 }
 
 
 void testReadOneByteFromSensor(){
-	uint8_t i;
-	for(i=0; i<8; i++){
-		gpioConfig_ExpectAndReturn(GPIO0, GPIO_OUTPUT, true);
-		gpioWrite_ExpectAndReturn(GPIO0, false, true);
-		delayInaccurateUs_Expect(10);
-		gpioConfig_ExpectAndReturn(GPIO0, GPIO_INPUT, true);
-		delayInaccurateUs_Expect(12);
-		if(i%2){
-			gpioRead_ExpectAndReturn(GPIO0, true);
-		}
-		else{
-			gpioRead_ExpectAndReturn(GPIO0, false);
-		}
-		delayInaccurateUs_Expect(50);	
-	}
+	setExpectedDataToReadOneByteFunction(0xAA);
 	TEST_ASSERT_EQUAL_HEX8(0xAA, oneWireSensorReadByte(&me));
 }
+
+void testResetSensor(){
+	setExpectedDataToResetFunction(false);
+	TEST_ASSERT_EQUAL(true, oneWireSensorReset(&me));
+	setExpectedDataToResetFunction(true);
+	TEST_ASSERT_EQUAL(false, oneWireSensorReset(&me));
+}
+
 
