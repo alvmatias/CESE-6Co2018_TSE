@@ -27,6 +27,30 @@ static const oneWireSensorOperation_t operation[MAX_RESOLUTIONS] = {
 
 /*==================[internal functions definition]==========================*/
 /**
+* @fn static uint8_t oneWireSensorCheckCRC(uint8_t crc, uint8_t data)
+* @brief Funcion que calcula el CRC de los datos del SCRATCHPAD del sensor.
+* @param crc : Valor de CRC actual.
+* @param data : byte de datos proveniente del SCRATCHPAD del sensor.
+* @return Valor de crc.
+* @note Funcion privada.
+*/
+static uint8_t oneWireSensorCheckCRC(uint8_t crc, uint8_t data){
+	uint8_t i;		/** i : Indice del for */
+	/* crc XOR data */
+	crc = crc ^ data;
+	/* Por cada bit dentro del byte */
+	for (i = 0; i < 8; i++){
+		/* Si es un '1', se hace un corrimiento a derecha y un XOR con el polinomio */
+	    if (crc & BIT_MASK)
+	        crc = (crc >> 1) ^ CRC_POLYNOMIAL;
+	    else /* Si no, solamente se hace el corrimiento */
+	        crc >>= 1;
+	}
+
+	return crc;
+}
+
+/**
 * @fn static void oneWireSensorWriteBit(oneWireSensor_t *me, uint8_t bit)
 * @brief Escritura de 1 bit del sensor 
 * @param me  : Estructura de datos del sensor a escribir un bit.
@@ -143,6 +167,7 @@ oneWireSensorError_t oneWireSensorReset(oneWireSensor_t *me){
 
 oneWireSensorError_t oneWireSensorFillScratchpad(oneWireSensor_t *me){	
 	uint8_t currentByte;  					/** currentByte : Byte leido en cada momento*/
+	uint8_t crc = 0;						/** crc : Valor del calculo de CRC */
 	/* Reset Sensor */
 	if(ONE_WIRE_SENSOR_WORKING == oneWireSensorReset(me)){
 		/* Skip ROM */
@@ -158,13 +183,28 @@ oneWireSensorError_t oneWireSensorFillScratchpad(oneWireSensor_t *me){
 			/* Lectura SRAM SCRATCHPAD */
 			oneWireSensorWriteByte(me, READ_SCRATCHPAD);
 			/* Llenado del SCRATCHPAD y calculo CRC */
-			for(currentByte = 0; currentByte < SCRATCHPAD_LENGTH; currentByte++){
+			for(currentByte = 0; currentByte < SCRATCHPAD_LENGTH - 1; currentByte++){
 				me->scratchpad[currentByte] = oneWireSensorReadByte(me);
+				crc = oneWireSensorCheckCRC(crc, me->scratchpad[currentByte]);
 			}
-			return ONE_WIRE_SENSOR_WORKING;
+			/* Obtencion CRC del SCRATCHPAD */
+			me->scratchpad[SCRATCHPAD_CRC_BYTE] = oneWireSensorReadByte(me);
+			/* Si el CRC calculado y el CRC del SCRATCHPAD son iguales, la lectura fue correcta */
+			if(crc == me->scratchpad[SCRATCHPAD_CRC_BYTE]){
+				return ONE_WIRE_SENSOR_WORKING;
+			}
+			else return ONE_WIRE_SENSOR_NOT_WORKING;
 		}
 		else return ONE_WIRE_SENSOR_NOT_WORKING;
 	}
 	else return ONE_WIRE_SENSOR_NOT_WORKING;
+}
+
+float oneWireSensorCalcTempValue(oneWireSensor_t *me){
+	/* Retorno del calculo de temperatura */
+	return (float) ( ( ( me->scratchpad[SCRATCHPAD_TEMPERATURE_MSB]&0x0f ) <<4 ) +
+						 (( me->scratchpad[SCRATCHPAD_TEMPERATURE_LSB]&0xf0 ) >>4) ) +
+						 (float)( ( me->scratchpad[SCRATCHPAD_TEMPERATURE_LSB]&me->operation.mask )*
+						 me->operation.step );
 }
 /*==================[end of file]============================================*/

@@ -18,12 +18,15 @@
 - :test: testFillSensorScratchpad
   :line: 117
   :message: ''
+- :test: testTempCalc
+  :line: 168
+  :message: ''
 :failures: []
 :ignores: []
 :counts:
-  :total: 5
-  :passed: 5
+  :total: 6
+  :passed: 6
   :failed: 0
   :ignored: 0
 :stdout: []
-:time: 0.0016034640011639567
+:time: 0.0032958949996100273

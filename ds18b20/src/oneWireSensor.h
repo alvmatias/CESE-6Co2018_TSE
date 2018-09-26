@@ -24,6 +24,12 @@
 * @brief Tamaño del SCRATCHPAD del sensor OneWire.
 */
 #define SCRATCHPAD_LENGTH 				9
+
+/**
+* @def CRC_POLYNOMIAL
+* @brief Polinomio utilizado para calcular el CRC del sensor OneWire.
+*/
+#define CRC_POLYNOMIAL					0x8C
 /*==================[typedef]================================================*/
 /**
 * @enum oneWireSensorError_t
@@ -170,5 +176,13 @@ oneWireSensorError_t oneWireSensorReset(oneWireSensor_t *me);
 */
 oneWireSensorError_t oneWireSensorFillScratchpad(oneWireSensor_t *me);
 
+/**
+* @fn float oneWireSensorReadTempValue()
+* @brief Calculo y lectura de la temperatura del scratchpad.
+* @param me : Estructura de datos del sensor a calcular su temperatura
+* @return Valor de la temperatura.
+* @note Utilizar despues de llenar el SCRATCHPAD correctamente.
+*/
+float oneWireSensorCalcTempValue(oneWireSensor_t *me);
 /*==================[end of file]============================================*/
 #endif /* #ifndef _ONE_WIRE_SENSOR_H_ */

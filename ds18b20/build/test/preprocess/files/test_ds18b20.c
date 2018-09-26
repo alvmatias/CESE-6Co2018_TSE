@@ -19,7 +19,7 @@ void resetTest(void);
 
 void setUp(void){
 
- oneWireSensorInit(&me, NINE_BITS_RESOLUTION, GPIO0);
+ oneWireSensorInit(&me, TWELVE_BITS_RESOLUTION, GPIO0);
 
 }
 
@@ -327,6 +327,10 @@ void testFillSensorScratchpad(){
 
  uint8_t i;
 
+ uint8_t scratchpad[]= {85, 1, 75, 70, 127, 255, 12, 16, 190};
+
+
+
 
 
  setExpectedDataToResetFunction(
@@ -339,9 +343,11 @@ void testFillSensorScratchpad(){
 
 0
 
-)), (UNITY_INT)((oneWireSensorFillScratchpad(&me))), (("Primer Caso")), (UNITY_UINT)(121), UNITY_DISPLAY_STYLE_INT);
+)), (UNITY_INT)((oneWireSensorFillScratchpad(&me))), (("Primer Caso")), (UNITY_UINT)(123), UNITY_DISPLAY_STYLE_INT);
 
  resetTest();
+
+
 
 
 
@@ -355,7 +361,7 @@ void testFillSensorScratchpad(){
 
  setExpectedDataToWriteOneByteFunction(CONVERT_T);
 
- delay_CMockExpect(127, NINE_BITS_RESOLUTION_DELAY);
+ delay_CMockExpect(130, me.operation.delay);
 
  setExpectedDataToResetFunction(
 
@@ -367,9 +373,11 @@ void testFillSensorScratchpad(){
 
 0
 
-)), (UNITY_INT)((oneWireSensorFillScratchpad(&me))), (("Segundo Caso")), (UNITY_UINT)(129), UNITY_DISPLAY_STYLE_INT);
+)), (UNITY_INT)((oneWireSensorFillScratchpad(&me))), (("Segundo Caso")), (UNITY_UINT)(132), UNITY_DISPLAY_STYLE_INT);
 
  resetTest();
+
+
 
 
 
@@ -383,7 +391,7 @@ void testFillSensorScratchpad(){
 
  setExpectedDataToWriteOneByteFunction(CONVERT_T);
 
- delay_CMockExpect(135, NINE_BITS_RESOLUTION_DELAY);
+ delay_CMockExpect(139, me.operation.delay);
 
  setExpectedDataToResetFunction(
 
@@ -407,8 +415,66 @@ void testFillSensorScratchpad(){
 
  UnityAssertEqualNumber((UNITY_INT)((
 
+0
+
+)), (UNITY_INT)((oneWireSensorFillScratchpad(&me))), (("Tercer Caso")), (UNITY_UINT)(148), UNITY_DISPLAY_STYLE_INT);
+
+ resetTest();
+
+
+
+
+
+ setExpectedDataToResetFunction(
+
+                               0
+
+                                    );
+
+ setExpectedDataToWriteOneByteFunction(SKIP_ROM);
+
+ setExpectedDataToWriteOneByteFunction(CONVERT_T);
+
+ delay_CMockExpect(155, me.operation.delay);
+
+ setExpectedDataToResetFunction(
+
+                               0
+
+                                    );
+
+ setExpectedDataToWriteOneByteFunction(SKIP_ROM);
+
+ setExpectedDataToWriteOneByteFunction(READ_SCRATCHPAD);
+
+
+
+ for(i=0; i<9; i++){
+
+  setExpectedDataToReadOneByteFunction(scratchpad[i]);
+
+ }
+
+
+
+ UnityAssertEqualNumber((UNITY_INT)((
+
 1
 
-)), (UNITY_INT)((oneWireSensorFillScratchpad(&me))), (("Tercer Caso")), (UNITY_UINT)(144), UNITY_DISPLAY_STYLE_INT);
+)), (UNITY_INT)((oneWireSensorFillScratchpad(&me))), (("Cuarto Caso")), (UNITY_UINT)(164), UNITY_DISPLAY_STYLE_INT);
+
+
+
+}
+
+
+
+void testTempCalc(){
+
+ UnityAssertFloatsWithin((UNITY_FLOAT)((UNITY_FLOAT)((21.3125)) * (UNITY_FLOAT)(0.00001f)), (UNITY_FLOAT)((UNITY_FLOAT)((21.3125))), (UNITY_FLOAT)((UNITY_FLOAT)((oneWireSensorCalcTempValue(&me)))), ((
+
+((void *)0)
+
+)), (UNITY_UINT)((UNITY_UINT)(169)));
 
 }

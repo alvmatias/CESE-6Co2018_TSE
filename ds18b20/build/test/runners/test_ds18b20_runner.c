@@ -47,6 +47,7 @@ extern void testWriteOneByteToSensor();
 extern void testReadOneByteFromSensor();
 extern void testResetSensor();
 extern void testFillSensorScratchpad();
+extern void testTempCalc();
 
 
 /*=======Mock Management=====*/
@@ -109,6 +110,7 @@ int main(void)
   RUN_TEST(testReadOneByteFromSensor, 105);
   RUN_TEST(testResetSensor, 110);
   RUN_TEST(testFillSensorScratchpad, 117);
+  RUN_TEST(testTempCalc, 168);
 
   CMock_Guts_MemFreeFinal();
   return suite_teardown(UnityEnd());

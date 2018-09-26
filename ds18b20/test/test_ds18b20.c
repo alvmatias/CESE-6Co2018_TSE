@@ -10,7 +10,7 @@ oneWireSensor_t me;
 void resetTest(void);
 
 void setUp(void){
-	oneWireSensorInit(&me, NINE_BITS_RESOLUTION, GPIO0);
+	oneWireSensorInit(&me, TWELVE_BITS_RESOLUTION, GPIO0);
 }
 
 void cleanup(void){
@@ -116,23 +116,27 @@ void testResetSensor(){
 
 void testFillSensorScratchpad(){
 	uint8_t i;
+	uint8_t scratchpad[]= {85, 1, 75, 70, 127, 255, 12, 16, 190};
+
 	/* Primer caso: Primer RESET falla */
 	setExpectedDataToResetFunction(true);
 	TEST_ASSERT_EQUAL_MESSAGE(false, oneWireSensorFillScratchpad(&me), "Primer Caso");
 	resetTest();
+
 	/* Segundo caso: Segundo RESET falla */
 	setExpectedDataToResetFunction(false);
 	setExpectedDataToWriteOneByteFunction(SKIP_ROM);
 	setExpectedDataToWriteOneByteFunction(CONVERT_T);
-	delay_Expect(NINE_BITS_RESOLUTION_DELAY);
+	delay_Expect(me.operation.delay);
 	setExpectedDataToResetFunction(true);
 	TEST_ASSERT_EQUAL_MESSAGE(false, oneWireSensorFillScratchpad(&me), "Segundo Caso");
 	resetTest();
-	/* Tercer caso: Todo funciona */
+
+	/* Tercer caso: CRC leido incorrecto */
 	setExpectedDataToResetFunction(false);
 	setExpectedDataToWriteOneByteFunction(SKIP_ROM);
 	setExpectedDataToWriteOneByteFunction(CONVERT_T);
-	delay_Expect(NINE_BITS_RESOLUTION_DELAY);
+	delay_Expect(me.operation.delay);
 	setExpectedDataToResetFunction(false);
 	setExpectedDataToWriteOneByteFunction(SKIP_ROM);
 	setExpectedDataToWriteOneByteFunction(READ_SCRATCHPAD);
@@ -141,5 +145,27 @@ void testFillSensorScratchpad(){
 		setExpectedDataToReadOneByteFunction(0xAA);
 	}
 
-	TEST_ASSERT_EQUAL_MESSAGE(true, oneWireSensorFillScratchpad(&me), "Tercer Caso");
+	TEST_ASSERT_EQUAL_MESSAGE(false, oneWireSensorFillScratchpad(&me), "Tercer Caso");
+	resetTest();
+
+	/* Cuarto caso: Todo funciona + CRC leido correctamente */
+	setExpectedDataToResetFunction(false);
+	setExpectedDataToWriteOneByteFunction(SKIP_ROM);
+	setExpectedDataToWriteOneByteFunction(CONVERT_T);
+	delay_Expect(me.operation.delay);
+	setExpectedDataToResetFunction(false);
+	setExpectedDataToWriteOneByteFunction(SKIP_ROM);
+	setExpectedDataToWriteOneByteFunction(READ_SCRATCHPAD);
+
+	for(i=0; i<SCRATCHPAD_LENGTH; i++){
+		setExpectedDataToReadOneByteFunction(scratchpad[i]);
+	}
+
+	TEST_ASSERT_EQUAL_MESSAGE(true, oneWireSensorFillScratchpad(&me), "Cuarto Caso");
+
 }
+
+void testTempCalc(){
+	TEST_ASSERT_EQUAL_FLOAT(21.3125, oneWireSensorCalcTempValue(&me));
+}
+
